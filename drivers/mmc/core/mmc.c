@@ -1022,20 +1022,20 @@ static int mmc_switch_status(struct mmc_card *card)
 static int mmc_select_hs(struct mmc_card *card)
 {
 	int err;
-
 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
 			   card->ext_csd.generic_cmd6_time,
 			   true, false, true);
 	if (!err) {
+		printk(KERN_INFO "E2C: mmc_select_hs\n");
 		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
 		err = mmc_switch_status(card);
 	}
 
-	if (err)
+	if (err) {
 		pr_warn("%s: switch to high-speed failed, err:%d\n",
 			mmc_hostname(card->host), err);
-
+	}
 	return err;
 }
 
@@ -1425,17 +1425,18 @@ err:
 static int mmc_select_timing(struct mmc_card *card)
 {
 	int err = 0;
-
 	if (!mmc_can_ext_csd(card))
 		goto bus_speed;
 
-	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES) {
 		err = mmc_select_hs400es(card);
-	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+	}
+	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
 		err = mmc_select_hs200(card);
-	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
+	}
+	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS) {
 		err = mmc_select_hs(card);
-
+	}
 	if (err && err != -EBADMSG)
 		return err;
 
@@ -1444,6 +1445,7 @@ bus_speed:
 	 * Set the bus speed to the selected bus timing.
 	 * If timing is not selected, backward compatible is the default.
 	 */
+	printk(KERN_INFO "E2C: mmc_select_timing\n");
 	mmc_set_bus_speed(card);
 	return 0;
 }
@@ -1497,7 +1499,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	 * mmc_go_idle is needed for eMMC that are asleep
 	 */
 	mmc_go_idle(host);
-
 	/* The extra bit indicates that we support high capacity */
 	err = mmc_send_op_cond(host, ocr | (1 << 30), &rocr);
 	if (err)
@@ -1519,6 +1520,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		err = mmc_send_cid(host, cid);
 	else
 		err = mmc_all_send_cid(host, cid);
+
 	if (err)
 		goto err;
 
@@ -1527,7 +1529,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			err = -ENOENT;
 			goto err;
 		}
-
 		card = oldcard;
 	} else {
 		/*
@@ -1612,7 +1613,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		/* Erase size depends on CSD and Extended CSD */
 		mmc_set_erase_size(card);
 	}
-
 	/*
 	 * If enhanced_area_en is TRUE, host needs to enable ERASE_GRP_DEF
 	 * bit.  This bit will be lost every time after a reset or power off.
@@ -1645,7 +1645,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			mmc_set_erase_size(card);
 		}
 	}
-
 	/*
 	 * Ensure eMMC user default partition is enabled
 	 */
@@ -1657,7 +1656,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		if (err && err != -EBADMSG)
 			goto free_card;
 	}
-
 	/*
 	 * Enable power_off_notification byte in the ext_csd register
 	 */
@@ -1676,19 +1674,18 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		if (!err)
 			card->ext_csd.power_off_notification = EXT_CSD_POWER_ON;
 	}
-
+printk(KERN_INFO "E2C: mmc_init_card: Select Timing\n");
 	/*
 	 * Select timing interface
 	 */
 	err = mmc_select_timing(card);
+	
 	if (err)
 		goto free_card;
-
 	if (mmc_card_hs200(card)) {
 		err = mmc_hs200_tuning(card);
 		if (err)
 			goto free_card;
-
 		err = mmc_select_hs400(card);
 		if (err)
 			goto free_card;
@@ -1701,12 +1698,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 				goto free_card;
 		}
 	}
-
 	/*
 	 * Choose the power class with selected bus interface
 	 */
 	mmc_select_powerclass(card);
 
+	printk(KERN_INFO "E2C: mmc_init_card: Enable HPI\n");
 	/*
 	 * Enable HPI feature (if supported)
 	 */
@@ -1714,6 +1711,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 				EXT_CSD_HPI_MGMT, 1,
 				card->ext_csd.generic_cmd6_time);
+				printk(KERN_INFO "E2C: mmc_init_card: Error %d\n",err);
 		if (err && err != -EBADMSG)
 			goto free_card;
 		if (err) {
@@ -1723,7 +1721,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		} else
 			card->ext_csd.hpi_en = 1;
 	}
-
 	/*
 	 * If cache size is higher than 0, this indicates
 	 * the existence of cache and it can be turned on.
@@ -1748,7 +1745,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			card->ext_csd.cache_ctrl = 1;
 		}
 	}
-
 	/*
 	 * The mandatory minimum values are defined for packed command.
 	 * read: 5, write: 3
@@ -1771,7 +1767,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			card->ext_csd.packed_event_en = 1;
 		}
 	}
-
 	if (!oldcard)
 		host->card = card;
 
@@ -2141,7 +2136,7 @@ int mmc_attach_mmc(struct mmc_host *host)
 	}
 
 	rocr = mmc_select_voltage(host, ocr);
-
+	
 	/*
 	 * Can we support the voltage of the card?
 	 */
@@ -2154,11 +2149,13 @@ int mmc_attach_mmc(struct mmc_host *host)
 	 * Detect and init the card.
 	 */
 	err = mmc_init_card(host, rocr, NULL);
+	
 	if (err)
 		goto err;
 
 	mmc_release_host(host);
 	err = mmc_add_card(host->card);
+	
 	if (err)
 		goto remove_card;
 

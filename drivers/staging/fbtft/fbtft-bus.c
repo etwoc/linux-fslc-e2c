@@ -1,5 +1,6 @@
 #include <linux/export.h>
 #include <linux/errno.h>
+#include <linux/delay.h>
 #include <linux/gpio.h>
 #include <linux/spi/spi.h>
 #include "fbtft.h"
@@ -37,7 +38,8 @@ void func(struct fbtft_par *par, int len, ...)                                \
 									      \
 	*buf = modifier((type)va_arg(args, unsigned int));                    \
 	if (par->gpio.dc != -1)                                               \
-		gpio_set_value(par->gpio.dc, 0);                              \
+		gpio_set_value(par->gpio.dc, 0);		\
+		udelay(1000);			                     \
 	ret = par->fbtftops.write(par, par->buf, sizeof(type) + offset);      \
 	if (ret < 0) {                                                        \
 		va_end(args);                                                 \
@@ -55,7 +57,8 @@ void func(struct fbtft_par *par, int len, ...)                                \
 			*buf++ = modifier((type)va_arg(args, unsigned int));  \
 		}                                                             \
 		if (par->gpio.dc != -1)                                       \
-			gpio_set_value(par->gpio.dc, 1);                      \
+			gpio_set_value(par->gpio.dc, 1); 		\
+			udelay(1000);                     \
 		ret = par->fbtftops.write(par, par->buf,		      \
 					  len * (sizeof(type) + offset));     \
 		if (ret < 0) {                                                \

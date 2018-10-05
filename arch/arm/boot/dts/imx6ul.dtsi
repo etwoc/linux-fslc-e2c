@@ -1055,7 +1055,7 @@
 				compatible = "fsl,imx6ul-weim", "fsl,imx6q-weim";
 				reg = <0x021b8000 0x4000>;
 				interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
-				clocks = <&clks IMX6UL_CLK_DUMMY>;
+				clocks = <&clks IMX6UL_CLK_EIM>;
 			};
 
 			ocotp: ocotp-ctrl@021bc000 {

@@ -114,6 +114,8 @@ static int __init weim_timing_setup(struct device_node *np, void __iomem *base,
 {
 	u32 cs_idx, value[devtype->cs_regs_count];
 	int i, ret;
+	u32 tmp;
+	u32 eim_wcr_offset = 0x90;
 
 	/* get the CS index from this child node's "reg" property. */
 	ret = of_property_read_u32(np, "reg", &cs_idx);
@@ -131,6 +133,18 @@ static int __init weim_timing_setup(struct device_node *np, void __iomem *base,
 	/* set the timing for WEIM */
 	for (i = 0; i < devtype->cs_regs_count; i++)
 		writel(value[i], base + cs_idx * devtype->cs_stride + i * 4);
+
+	/* e2c: Set BCLK to continuous, Set Divisor to 1 for 133MHz clk 
+	 EIM_WCR(0x021B8090) - Bit 3 = 1 (CONT_BCLK_SEL) 
+	 					   Bit 1,2 = 00
+						   Bit 0 = 1
+	*/
+	if (of_property_read_bool(np, "bclk-continuous")) {
+ 
+		tmp = readl(base + eim_wcr_offset);
+		tmp = tmp | 0x9;
+		writel(tmp,base + eim_wcr_offset);
+	}
 
 	return 0;
 }
@@ -176,8 +190,9 @@ static int __init weim_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct clk *clk;
 	void __iomem *base;
-	int ret;
+	
 
+	int ret;
 	/* get the resource */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	base = devm_ioremap_resource(&pdev->dev, res);

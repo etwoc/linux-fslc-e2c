@@ -254,9 +254,9 @@ static int fbtft_backlight_update_status(struct backlight_device *bd)
 		__func__, polarity, bd->props.power, bd->props.fb_blank);
 
 	if ((bd->props.power == FB_BLANK_UNBLANK) && (bd->props.fb_blank == FB_BLANK_UNBLANK))
-		gpio_set_value(par->gpio.led[0], polarity);
+		gpio_set_value_cansleep(par->gpio.led[0], polarity);
 	else
-		gpio_set_value(par->gpio.led[0], !polarity);
+		gpio_set_value_cansleep(par->gpio.led[0], !polarity);
 
 	return 0;
 }
@@ -295,7 +295,7 @@ void fbtft_register_backlight(struct fbtft_par *par)
 	bl_props.type = BACKLIGHT_RAW;
 	/* Assume backlight is off, get polarity from current state of pin */
 	bl_props.power = FB_BLANK_POWERDOWN;
-	if (!gpio_get_value(par->gpio.led[0]))
+	if (!gpio_get_value_cansleep(par->gpio.led[0]))
 		bl_props.state |= BL_CORE_DRIVER1;
 
 	bd = backlight_device_register(dev_driver_string(par->info->device),
@@ -335,9 +335,9 @@ static void fbtft_reset(struct fbtft_par *par)
 	if (par->gpio.reset == -1)
 		return;
 	fbtft_par_dbg(DEBUG_RESET, par, "%s()\n", __func__);
-	gpio_set_value(par->gpio.reset, 0);
+	gpio_set_value_cansleep(par->gpio.reset, 0);
 	udelay(20);
-	gpio_set_value(par->gpio.reset, 1);
+	gpio_set_value_cansleep(par->gpio.reset, 1);
 	mdelay(120);
 }
 
@@ -810,7 +810,6 @@ struct fb_info *fbtft_framebuffer_alloc(struct fbtft_display *display,
 	par->gamma.num_values = display->gamma_len;
 	mutex_init(&par->gamma.lock);
 	info->pseudo_palette = par->pseudo_palette;
-
 	if (par->gamma.curves && gamma) {
 		if (fbtft_gamma_parse_str(par,
 			par->gamma.curves, gamma, strlen(gamma)))

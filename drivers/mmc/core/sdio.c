@@ -1109,7 +1109,7 @@ int mmc_attach_sdio(struct mmc_host *host)
 
 	BUG_ON(!host);
 	WARN_ON(!host->claimed);
-
+	
 	err = mmc_send_io_op_cond(host, 0, &ocr);
 	if (err)
 		return err;

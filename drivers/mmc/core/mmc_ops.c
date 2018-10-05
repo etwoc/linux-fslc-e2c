@@ -8,7 +8,7 @@
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
  */
-
+#define DEBUG
 #include <linux/slab.h>
 #include <linux/export.h>
 #include <linux/types.h>
@@ -483,7 +483,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 	bool busy = false;
 
 	mmc_retune_hold(host);
-
+	
 	/*
 	 * If the cmd timeout and the max_busy_timeout of the host are both
 	 * specified, let's validate them. A failure means we need to prevent
@@ -515,6 +515,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		cmd.sanitize_busy = true;
 
 	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+
 	if (err)
 		goto out;
 
@@ -550,6 +551,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		expired = time_after(jiffies, timeout);
 		if (send_status) {
 			err = __mmc_send_status(card, &status, ignore_crc);
+
 			if (err)
 				goto out;
 		}

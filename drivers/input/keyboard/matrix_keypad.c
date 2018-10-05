@@ -405,6 +405,7 @@ matrix_keypad_parse_dt(struct device *dev)
 	unsigned int *gpios;
 	int i, nrow, ncol;
 
+	printk(KERN_INFO "E2C: Matrix Keypad DT Parse\n");
 	if (!np) {
 		dev_err(dev, "device lacks DT data\n");
 		return ERR_PTR(-ENODEV);
@@ -473,7 +474,7 @@ static int matrix_keypad_probe(struct platform_device *pdev)
 	struct matrix_keypad *keypad;
 	struct input_dev *input_dev;
 	int err;
-
+	printk(KERN_INFO "E2C: Matrix Keypad Probe\n");
 	pdata = dev_get_platdata(&pdev->dev);
 	if (!pdata) {
 		pdata = matrix_keypad_parse_dt(&pdev->dev);

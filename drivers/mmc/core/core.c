@@ -10,6 +10,8 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+
+#define DEBUG
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/interrupt.h>
@@ -547,12 +549,12 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
 void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
 {
 	struct mmc_command *cmd;
-
+	
 	while (1) {
 		wait_for_completion(&mrq->completion);
 
 		cmd = mrq->cmd;
-
+		/* printk(KERN_INFO "E2C: %s: Command: CMD%u\n",mmc_hostname(host), cmd->opcode); */
 		/*
 		 * If host has timed out waiting for the sanitize
 		 * to complete, card might be still in programming state
@@ -575,7 +577,7 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
 			break;
 
 		mmc_retune_recheck(host);
-
+		/* printk(KERN_INFO "E2C: %s: req failed (CMD%u): %d, retrying...\n",mmc_hostname(host), cmd->opcode, cmd->error); */
 		pr_debug("%s: req failed (CMD%u): %d, retrying...\n",
 			 mmc_hostname(host), cmd->opcode, cmd->error);
 		cmd->retries--;
@@ -824,7 +826,7 @@ int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd, int retries
 	struct mmc_request mrq = {NULL};
 
 	WARN_ON(!host->claimed);
-
+	
 	memset(cmd->resp, 0, sizeof(cmd->resp));
 	cmd->retries = retries;
 

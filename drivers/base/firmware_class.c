@@ -6,7 +6,6 @@
  * Please see Documentation/firmware_class/ for more information.
  *
  */
-
 #include <linux/capability.h>
 #include <linux/device.h>
 #include <linux/module.h>
@@ -350,7 +349,7 @@ fw_get_filesystem_firmware(struct device *device, struct firmware_buf *buf)
 		rc = kernel_read_file_from_path(path, &buf->data, &size, msize,
 						id);
 		if (rc) {
-			if (rc == -ENOENT)
+			if (rc == -ENOENT) 
 				dev_dbg(device, "loading %s failed with error %d\n",
 					 path, rc);
 			else

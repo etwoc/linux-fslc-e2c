@@ -18,6 +18,8 @@
  * Boston, MA  02110-1301, USA.
  */
 
+#define DEBUG
+#include <linux/device.h>
 #include <linux/clk.h>
 #include <linux/completion.h>
 #include <linux/delay.h>
@@ -225,7 +227,7 @@ static bool spi_imx_can_dma(struct spi_master *master, struct spi_device *spi,
 		bpw = spi->bits_per_word;
 
 	bpw = spi_imx_bytes_per_word(bpw);
-
+	/* printk("IAN: Bytes per word = %d wml = %d\n",bpw,spi_imx->wml); */
 	if (bpw != 1 && bpw != 2 && bpw != 4)
 		return false;
 
@@ -233,7 +235,7 @@ static bool spi_imx_can_dma(struct spi_master *master, struct spi_device *spi,
 		return false;
 
 	if (transfer->len % (spi_imx->wml * bpw))
-		return false;
+		return false; 
 
 	return true;
 }
@@ -425,14 +427,17 @@ static int mx51_ecspi_config(struct spi_device *spi,
 	 * and enable DMA request.
 	 */
 	if (spi_imx->devtype_data->devtype == IMX6UL_ECSPI)
-		tx_wml = spi_imx->wml / 2;
-
-	writel(MX51_ECSPI_DMA_RX_WML(spi_imx->wml) |
+		tx_wml = spi_imx->wml / 2; 
+	 /* printk("IAN: DMAREG = 0x%x\n",(MX51_ECSPI_DMA_RX_WML(spi_imx->wml) |
 		MX51_ECSPI_DMA_TX_WML(tx_wml) |
 		MX51_ECSPI_DMA_RXT_WML(spi_imx->wml) |
 		MX51_ECSPI_DMA_TEDEN | MX51_ECSPI_DMA_RXDEN |
-		MX51_ECSPI_DMA_RXTDEN, spi_imx->base + MX51_ECSPI_DMA);
-
+		MX51_ECSPI_DMA_RXTDEN)); */
+	writel(MX51_ECSPI_DMA_RX_WML(spi_imx->wml) | /* IAN */
+		MX51_ECSPI_DMA_TX_WML(spi_imx->wml) | /* IAN */
+		MX51_ECSPI_DMA_RXT_WML(spi_imx->wml) |
+		MX51_ECSPI_DMA_TEDEN | MX51_ECSPI_DMA_RXDEN |
+		MX51_ECSPI_DMA_RXTDEN , spi_imx->base + MX51_ECSPI_DMA); 
 	return 0;
 }
 
@@ -810,13 +815,15 @@ static irqreturn_t spi_imx_isr(int irq, void *dev_id)
 {
 	struct spi_imx_data *spi_imx = dev_id;
 
+
 	while (spi_imx->devtype_data->rx_available(spi_imx)) {
 		spi_imx->rx(spi_imx);
 		spi_imx->txfifo--;
-	}
+	} 
 
 	if (spi_imx->count) {
 		spi_imx_push(spi_imx);
+
 		return IRQ_HANDLED;
 	}
 
@@ -826,6 +833,7 @@ static irqreturn_t spi_imx_isr(int irq, void *dev_id)
 		 */
 		spi_imx->devtype_data->intctrl(
 				spi_imx, MXC_INT_RR);
+
 		return IRQ_HANDLED;
 	}
 
@@ -864,7 +872,10 @@ static int spi_imx_dma_configure(struct spi_master *master,
 	tx.direction = DMA_MEM_TO_DEV;
 	tx.dst_addr = spi_imx->base_phys + MXC_CSPITXDATA;
 	tx.dst_addr_width = buswidth;
-	tx.dst_maxburst = spi_imx->wml / 2;
+	/*IAN*/
+	tx.dst_maxburst = spi_imx->wml;
+	/*IAN END */
+    /* tx.dst_maxburst = spi_imx->wml / 2; */
 	ret = dmaengine_slave_config(master->dma_tx, &tx);
 	if (ret) {
 		dev_err(spi_imx->dev, "TX dma configuration failed with %d\n", ret);
@@ -962,6 +973,7 @@ static int spi_imx_sdma_init(struct device *dev, struct spi_imx_data *spi_imx,
 	}
 
 	/* Prepare for RX : */
+
 	master->dma_rx = dma_request_slave_channel_reason(dev, "rx");
 	if (IS_ERR(master->dma_rx)) {
 		ret = PTR_ERR(master->dma_rx);
@@ -978,7 +990,6 @@ static int spi_imx_sdma_init(struct device *dev, struct spi_imx_data *spi_imx,
 	master->max_dma_len = MAX_SDMA_BD_BYTES;
 	spi_imx->bitbang.master->flags = SPI_MASTER_MUST_RX |
 					 SPI_MASTER_MUST_TX;
-
 	return 0;
 err:
 	spi_imx_sdma_exit(spi_imx);
@@ -1026,7 +1037,8 @@ static int spi_imx_dma_transfer(struct spi_imx_data *spi_imx,
 	 * The TX DMA setup starts the transfer, so make sure RX is configured
 	 * before TX.
 	 */
-	desc_rx = dmaengine_prep_slave_sg(master->dma_rx,
+
+ desc_rx = dmaengine_prep_slave_sg(master->dma_rx,
 				rx->sgl, rx->nents, DMA_DEV_TO_MEM,
 				DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
 	if (!desc_rx)
@@ -1051,7 +1063,9 @@ static int spi_imx_dma_transfer(struct spi_imx_data *spi_imx,
 	dmaengine_submit(desc_tx);
 	reinit_completion(&spi_imx->dma_tx_completion);
 	dma_async_issue_pending(master->dma_tx);
-
+	/*IAN*/
+	gpio_set_value(9,0);
+	/*IAN END*/
 	transfer_timeout = spi_imx_calculate_timeout(spi_imx, transfer->len);
 
 	spi_imx->devtype_data->trigger(spi_imx);
@@ -1065,7 +1079,7 @@ static int spi_imx_dma_transfer(struct spi_imx_data *spi_imx,
 		dmaengine_terminate_all(master->dma_rx);
 		return -ETIMEDOUT;
 	}
-
+	/* IAN */
 	timeout = wait_for_completion_timeout(&spi_imx->dma_rx_completion,
 					      transfer_timeout);
 	if (!timeout) {
@@ -1074,7 +1088,9 @@ static int spi_imx_dma_transfer(struct spi_imx_data *spi_imx,
 		dmaengine_terminate_all(master->dma_rx);
 		return -ETIMEDOUT;
 	}
-
+	/*IAN*/
+	gpio_set_value(9,1);
+	/*IAN END*/
 	return transfer->len;
 }
 
@@ -1089,7 +1105,9 @@ static int spi_imx_pio_transfer(struct spi_device *spi,
 	spi_imx->rx_buf = transfer->rx_buf;
 	spi_imx->count = transfer->len;
 	spi_imx->txfifo = 0;
-
+		/*IAN*/
+	/* gpio_set_value(9,0); */ 
+	/*IAN END*/
 	reinit_completion(&spi_imx->xfer_done);
 
 	spi_imx_push(spi_imx);
@@ -1105,7 +1123,9 @@ static int spi_imx_pio_transfer(struct spi_device *spi,
 		spi_imx->devtype_data->reset(spi_imx);
 		return -ETIMEDOUT;
 	}
-
+		/*IAN*/
+	/* gpio_set_value(9,1); */
+	/*IAN END*/
 	return transfer->len;
 }
 
@@ -1114,10 +1134,12 @@ static int spi_imx_transfer(struct spi_device *spi,
 {
 	struct spi_imx_data *spi_imx = spi_master_get_devdata(spi->master);
 
-	if (spi_imx->usedma)
+	if (spi_imx->usedma) {
 		return spi_imx_dma_transfer(spi_imx, transfer);
-	else
+	}
+	else {
 		return spi_imx_pio_transfer(spi, transfer);
+	}
 }
 
 static int spi_imx_setup(struct spi_device *spi)
@@ -1130,6 +1152,10 @@ static int spi_imx_setup(struct spi_device *spi)
 				      spi->mode & SPI_CS_HIGH ? 0 : 1);
 
 	spi_imx_chipselect(spi, BITBANG_CS_INACTIVE);
+
+	/*IAN*/
+	gpio_direction_output(9,1);
+	/*IAN END*/
 
 	return 0;
 }

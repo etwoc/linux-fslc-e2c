@@ -35,6 +35,7 @@
 #include <linux/dmapool.h>
 #include <linux/firmware.h>
 #include <linux/slab.h>
+#include <linux/gpio.h>
 #include <linux/platform_device.h>
 #include <linux/dmaengine.h>
 #include <linux/of.h>

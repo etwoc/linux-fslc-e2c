@@ -367,6 +367,7 @@ dtb-$(CONFIG_SOC_IMX6Q) += \
 	imx6dl-sabresd-enetirq.dtb \
 	imx6dl-wandboard.dtb \
 	imx6dl-wandboard-revb1.dtb \
+	imx6dl-sc200-ldo.dtb \
 	imx6dqscm-1gb-qwks-rev2-fix-ldo.dtb \
 	imx6dqscm-1gb-qwks-rev2-interleave-android-ldo.dtb \
 	imx6dqscm-1gb-qwks-rev2-wifi-fix-ldo.dtb \
@@ -506,7 +507,8 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-9x9-evk-btwifi.dtb \
 	imx6ul-9x9-evk-btwifi-oob.dtb \
 	imx6ul-9x9-evk-csi.dtb \
-	imx6ul-9x9-evk-ldo.dtb
+	imx6ul-9x9-evk-ldo.dtb \
+        imx6ul-sc100.dtb \
 dtb-$(CONFIG_SOC_IMX6ULL) += \
 	imx6ull-14x14-ddr3-arm2.dtb \
 	imx6ull-14x14-ddr3-arm2-adc.dtb \

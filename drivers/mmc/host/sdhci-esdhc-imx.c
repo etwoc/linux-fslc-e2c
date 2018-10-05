@@ -1148,7 +1148,6 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
 	struct device_node *np = pdev->dev.of_node;
 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
 	int ret;
-
 	if (of_get_property(np, "fsl,wp-controller", NULL))
 		boarddata->wp_type = ESDHC_WP_CONTROLLER;
 
@@ -1379,7 +1378,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
 		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
 	if (err)
 		goto disable_clk;
-
 	sdhci_esdhc_imx_hwinit(host);
 
 	device_set_wakeup_capable(&pdev->dev, 1);
@@ -1387,7 +1385,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
 	err = sdhci_add_host(host);
 	if (err)
 		goto disable_clk;
-
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
 	pm_runtime_use_autosuspend(&pdev->dev);

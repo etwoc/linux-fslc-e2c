@@ -28,7 +28,7 @@
 #include <uapi/linux/gpio.h>
 
 #include "gpiolib.h"
-
+#define DEBUG
 #define CREATE_TRACE_POINTS
 #include <trace/events/gpio.h>
 

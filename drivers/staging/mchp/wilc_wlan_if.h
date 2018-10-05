@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /* ///////////////////////////////////////////////////////////////////////// */
 /*  */
 /* Copyright (c) Atmel Corporation.  All rights reserved. */
@@ -11,6 +12,7 @@
 #define WILC_WLAN_IF_H
 
 #include <linux/netdevice.h>
+#include "wilc_debugfs.h"
 
 /********************************************
  *
@@ -21,6 +23,10 @@
 #define HIF_SDIO		(0)
 #define HIF_SPI			BIT(0)
 #define HIF_SDIO_GPIO_IRQ	BIT(2)
+
+#define	FIRMWARE_WILC1000_WIFi		"mchp/wilc1000_wifi_firmware.bin"
+#define	FIRMWARE_WILC3000_WIFI		"mchp/wilc3000_wifi_firmware.bin"
+#define	FIRMWARE_WILC3000_BLE		"mchp/wilc3000_ble_firmware.bin"
 
 /********************************************
  *
@@ -48,17 +54,18 @@ struct sdio_cmd53 {
 };
 
 #define WILC_MAC_INDICATE_STATUS	0x1
-#define WILC_MAC_STATUS_INIT		-1
-#define WILC_MAC_STATUS_READY		0
-#define WILC_MAC_STATUS_CONNECT		1
-
 #define WILC_MAC_INDICATE_SCAN		0x2
+
+#define MAC_STATUS_INIT			-1
+#define MAC_STATUS_CONNECTED		1
+#define MAC_STATUS_DISCONNECTED		0
 
 struct tx_complete_data {
 	int size;
 	void *buff;
 	u8 *bssid;
 	struct sk_buff *skb;
+	struct wilc_vif *vif;
 };
 
 typedef void (*wilc_tx_complete_func_t)(void *, int);
@@ -74,7 +81,7 @@ typedef void (*wilc_tx_complete_func_t)(void *, int);
 #define MAX_SSID_LEN            33
 #define MAX_RATES_SUPPORTED     12
 
-typedef enum {
+enum {
 	SUPP_RATES_IE		= 1,
 	EXT_SUPP_RATES_IE	= 50,
 	HT_CAPABILITY_IE	= 45,
@@ -82,15 +89,15 @@ typedef enum {
 	WPA_IE			= 221,
 	WMM_IE			= 221,
 	P2P_IE			= 221,
-} BEACON_IE;
+};
 
-typedef enum {
+enum bss_types {
 	INFRASTRUCTURE		= 0,
 	INDEPENDENT,
 	AP,
-} BSSTYPE_T;
+};
 
-typedef enum {
+enum {
 	RATE_AUTO		= 0,
 	RATE_1MB		= 1,
 	RATE_2MB		= 2,
@@ -104,55 +111,49 @@ typedef enum {
 	RATE_26MB		= 36,
 	RATE_48MB		= 48,
 	RATE_54MB		= 54
-} TX_RATE_T;
+};
 
-typedef enum {
+enum {
 	B_ONLY_MODE		= 0,    /* 1, 2 M, otherwise 5, 11 M */
 	G_ONLY_MODE,			/* 6,12,24 otherwise 9,18,36,48,54 */
 	G_MIXED_11B_1_MODE,		/* 1,2,5.5,11 otherwise all on */
 	G_MIXED_11B_2_MODE,		/* 1,2,5,11,6,12,24 otherwise all on */
-} G_OPERATING_MODE_T;
+};
 
-typedef enum {
+enum {
 	G_SHORT_PREAMBLE	= 0,	/* Short Preamble */
 	G_LONG_PREAMBLE		= 1,	/* Long Preamble */
 	G_AUTO_PREAMBLE		= 2,	/* Auto Preamble Selection */
-} G_PREAMBLE_T;
+};
 
-#define MAC_CONNECTED		1
-#define MAC_DISCONNECTED	0
+#define PWR_DEV_SRC_WIFI	0
+#define PWR_DEV_SRC_BT		1
+#define PWR_DEV_SRC_MAX		2
 
-#define SCAN_DONE		TRUE
-typedef enum {
+enum {
 	PASSIVE_SCAN		= 0,
 	ACTIVE_SCAN		= 1,
-} SCANTYPE_T;
+};
 
-typedef enum {
+enum {
 	NO_POWERSAVE		= 0,
 	MIN_FAST_PS		= 1,
 	MAX_FAST_PS		= 2,
 	MIN_PSPOLL_PS		= 3,
 	MAX_PSPOLL_PS		= 4
-} USER_PS_MODE_T;
+};
 
-typedef enum {
-	CHIP_WAKEDUP		= 0,
-	CHIP_SLEEPING_AUTO      = 1,
-	CHIP_SLEEPING_MANUAL	= 2
-} CHIP_PS_STATE_T;
-
-typedef enum {
+enum bus_acquire {
 	ACQUIRE_ONLY            = 0,
 	ACQUIRE_AND_WAKEUP	= 1,
-} BUS_ACQUIRE_T;
+};
 
-typedef enum {
+enum bus_release {
 	RELEASE_ONLY		= 0,
 	RELEASE_ALLOW_SLEEP	= 1,
-} BUS_RELEASE_T;
+};
 
-typedef enum {
+enum {
 	NO_SECURITY		= 0,
 	WEP_40			= 0x3,
 	WEP_104			= 0x7,
@@ -162,7 +163,7 @@ typedef enum {
 	WPA2_AES		= 0x31,
 	WPA2_TKIP		= 0x51,
 	WPA2_AES_TKIP		= 0x71,	/* Aes or Tkip */
-} SECURITY_T;
+};
 
 enum AUTHTYPE {
 	OPEN_SYSTEM		= 1,
@@ -177,88 +178,88 @@ enum SITESURVEY {
 	SITE_SURVEY_OFF		= 2
 };
 
-typedef enum {
+enum {
 	NORMAL_ACK		= 0,
 	NO_ACK,
-} ACK_POLICY_T;
+};
 
-typedef enum {
+enum {
 	DONT_RESET		= 0,
 	DO_RESET		= 1,
 	NO_REQUEST		= 2,
-} RESET_REQ_T;
+};
 
-typedef enum {
+enum {
 	REKEY_DISABLE		= 1,
 	REKEY_TIME_BASE,
 	REKEY_PKT_BASE,
 	REKEY_TIME_PKT_BASE
-} RSNA_REKEY_POLICY_T;
+};
 
-typedef enum {
+enum {
 	FILTER_NO		= 0x00,
 	FILTER_AP_ONLY		= 0x01,
 	FILTER_STA_ONLY		= 0x02
-} SCAN_CLASS_FITLER_T;
+};
 
-typedef enum {
+enum {
 	PRI_HIGH_RSSI		= 0x00,
 	PRI_LOW_RSSI		= 0x04,
 	PRI_DETECT		= 0x08
-} SCAN_PRI_T;
+};
 
-typedef enum {
+enum {
 	CH_FILTER_OFF		= 0x00,
 	CH_FILTER_ON		= 0x10
-} CH_FILTER_T;
+};
 
-typedef enum {
+enum {
 	AUTO_PROT		= 0,	/* Auto */
 	NO_PROT,			/* Do not use any protection */
 	ERP_PROT,			/* Protect all ERP frame exchanges */
 	HT_PROT,			/* Protect all HT frame exchanges  */
 	GF_PROT,			/* Protect all GF frame exchanges  */
-} N_PROTECTION_MODE_T;
+};
 
-typedef enum {
+enum {
 	G_SELF_CTS_PROT,
 	G_RTS_CTS_PROT,
-} G_PROTECTION_MODE_T;
+};
 
-typedef enum {
+enum {
 	HT_MIXED_MODE		= 1,
 	HT_ONLY_20MHZ_MODE,
 	HT_ONLY_20_40MHZ_MODE,
-} N_OPERATING_MODE_T;
+};
 
-typedef enum {
+enum {
 	NO_DETECT		= 0,
 	DETECT_ONLY		= 1,
 	DETECT_PROTECT		= 2,
 	DETECT_PROTECT_REPORT	= 3,
-} N_OBSS_DETECTION_T;
+};
 
-typedef enum {
+enum {
 	RTS_CTS_NONHT_PROT	= 0,	/* RTS-CTS at non-HT rate */
 	FIRST_FRAME_NONHT_PROT,		/* First frame at non-HT rate */
 	LSIG_TXOP_PROT,                 /* LSIG TXOP Protection */
 	FIRST_FRAME_MIXED_PROT,		/* First frame at Mixed format */
-} N_PROTECTION_TYPE_T;
+};
 
-typedef enum {
+enum {
 	STATIC_MODE		= 1,
 	DYNAMIC_MODE		= 2,
 	MIMO_MODE		= 3,	/* power save disable */
-} N_SMPS_MODE_T;
+};
 
-typedef enum {
+enum {
 	DISABLE_SELF_CTS,
 	ENABLE_SELF_CTS,
 	DISABLE_TX_ABORT,
 	ENABLE_TX_ABORT,
 	HW_TRIGGER_ABORT,
 	SW_TRIGGER_ABORT,
-} TX_ABORT_OPTION_T;
+};
 
 enum wid_type {
 	WID_CHAR		= 0,
@@ -273,6 +274,13 @@ enum wid_type {
 	WID_TYPE_FORCE_32BIT	= 0xFFFFFFFF
 };
 
+enum {
+	ANTENNA1		= 0,
+	ANTENNA2		= 1,
+	DIVERSITY		= 2,
+	NUM_ANT_MODE
+};
+
 struct wid {
 	u16 id;
 	enum wid_type type;
@@ -280,7 +288,7 @@ struct wid {
 	s8 *val;
 };
 
-typedef enum {
+enum {
 	WID_NIL				= 0xffff,
 
 	/*
@@ -336,6 +344,7 @@ typedef enum {
 	 *  -----------------------------------------------------------
 	 */
 	WID_STATUS			= 0x0005,
+	WID_BT_COEX_MODE		= 0x0006,
 
 	/*
 	 *  Scan type
@@ -430,6 +439,15 @@ typedef enum {
 	 *  -----------------------------------------------------------
 	 */
 	WID_ACK_POLICY			= 0x0011,
+
+	/*
+	 *  Set coex null frames transmission mode 
+	 * --------------------------------------------------------------
+ 	 *  Configuration :   Enable	Disable
+	 *  Values to set :       1			0
+	 * --------------------------------------------------------------
+	 */
+	WID_COEX_NULL_FRAMES_MODE               = 0x0013,
 
 	/*
 	 *  Reset MAC (Set only)
@@ -740,8 +758,9 @@ typedef enum {
 
 	WID_DEL_BEACON			= 0x00CA,
 
-	WID_LOGTerminal_Switch		= 0x00CD,
+	WID_LOG_Terminal_Switch		= 0x00CD,
 	WID_TX_POWER			= 0x00CE,
+	WID_WOWLAN_TRIGGER		= 0X00CF,
 	/*  EMAC Short WID list */
 	/*  RTS Threshold */
 	/*
@@ -765,7 +784,6 @@ typedef enum {
 	WID_LONG_RETRY_LIMIT		= 0x1003,
 	WID_BEACON_INTERVAL		= 0x1006,
 	WID_MEMORY_ACCESS_16BIT		= 0x1008,
-	WID_RX_SENSE			= 0x100B,
 	WID_ACTIVE_SCAN_TIME		= 0x100C,
 	WID_PASSIVE_SCAN_TIME		= 0x100D,
 
@@ -806,11 +824,8 @@ typedef enum {
 	WID_HW_RX_COUNT			= 0x2015,
 	WID_MEMORY_ADDRESS		= 0x201E,
 	WID_MEMORY_ACCESS_32BIT		= 0x201F,
-	WID_RF_REG_VAL			= 0x2021,
 
 	/* NMAC Integer WID list */
-	WID_11N_PHY_ACTIVE_REG_VAL	= 0x2080,
-
 	/* Custom Integer WID list */
 	WID_GET_INACTIVE_TIME		= 0x2084,
 	WID_SET_OPERATION_MODE		= 0X2086,
@@ -831,7 +846,6 @@ typedef enum {
 	WID_SUPP_PASSWORD		= 0x3011,
 	WID_SITE_SURVEY_RESULTS		= 0x3012,
 	WID_RX_POWER_LEVEL		= 0x3013,
-	WID_DEL_ALL_RX_BA		= 0x3014,
 	WID_SET_STA_MAC_INACTIVE_TIME	= 0x3017,
 	WID_ADD_WEP_KEY			= 0x3019,
 	WID_REMOVE_WEP_KEY		= 0x301A,
@@ -845,9 +859,9 @@ typedef enum {
 	WID_MODEL_NAME			= 0x3027, /*Added for CAPI tool */
 	WID_MODEL_NUM			= 0x3028, /*Added for CAPI tool */
 	WID_DEVICE_NAME			= 0x3029, /*Added for CAPI tool */
-	WID_SET_DRV_HANDLER		= 0x3030,
 
 	/* NMAC String WID list */
+ 	WID_SET_DRV_HANDLER			= 0x3079,
 	WID_11N_P_ACTION_REQ		= 0x3080,
 	WID_HUT_TEST_ID			= 0x3081,
 	WID_PMKID_INFO			= 0x3082,
@@ -885,13 +899,12 @@ typedef enum {
 
 	WID_SETUP_MULTICAST_FILTER	= 0x408b,
 
+	WID_ANTENNA_SELECTION		= 0x408c,
 	/* Miscellaneous WIDs */
 	WID_ALL				= 0x7FFE,
 	WID_MAX				= 0xFFFF
-} WID_T;
+};
 
 struct wilc;
-int wilc_wlan_init(struct net_device *dev);
-u32 wilc_get_chipid(struct wilc *wilc, bool update);
 
 #endif
