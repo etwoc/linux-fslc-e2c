@@ -4,7 +4,7 @@ source /opt/yocto/2.4.2/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi
 
 BOARD=$1
 SC100_ROOTFS_PATH=/home/user/projects/rootfs
-SC200_ROOTFS_PATH=/home/user/projects/rootfs
+SC200_ROOTFS_PATH=/home/user/projects/rootfs_chrome
 TFTP_PATH=/home/user/projects/tftp
 
 echo "Board type is" $BOARD
@@ -21,7 +21,7 @@ elif [ "sc200" == "$1" ]; then
 elif [ "playgo" == "$1" ]; then
 	IMX6TYPE="playgo_defconfig"
 	IMX6DTB="imx6ul-playgo.dtb"
-	ROOTFS_PATH=$SC200_ROOTFS_PATH
+	ROOTFS_PATH=$SC100_ROOTFS_PATH
 elif [ "evk" == "$1" ]; then
 	IMX6TYPE="imx_v7_defconfig" 
 	IMX6DTB="imx6ul-14x14-evk.dtb"

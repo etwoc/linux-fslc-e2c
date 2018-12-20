@@ -37,17 +37,17 @@ typedef enum lcd_topology {LCD_TOPO_40x2 = 0,
                    LCD_TOPO_16x2 = 4,
                    LCD_TOPO_16x1T1 = 5,
                    LCD_TOPO_16x1T2 = 6,
-		   LCD_TOPO_8x2 = 7,
+		            LCD_TOPO_8x2 = 7,
                    } lcd_topology;
                    
 
 
-#define DEFAULT_CHIP_ADDRESS 0x38
+#define DEFAULT_CHIP_ADDRESS 0x20
 #define LCD_BUFFER_SIZE 0x68 //20 columns * 4 rows + 4 chars extra
 #define SUCCESS 0
-#define LCD_DEFAULT_COLS 16
+#define LCD_DEFAULT_COLS 20
 #define LCD_DEFAULT_ROWS 2
-#define LCD_DEFAULT_ORGANIZATION LCD_TOPO_16x2
+#define LCD_DEFAULT_ORGANIZATION LCD_TOPO_20x2
 
 #define PINTR(pin) (pinout[pin])
 

@@ -98,38 +98,35 @@
 		display-width-chars = <16>;
 	}; */
 
-	/* matrix-keypad {
-		compatible = "gpio-matrix-keypad";
-		debounce-delay-ms = <5>;
-		col-scan-delay-us = <120>;
+	gpio_keys_polled {
+		compatible = "gpio-keys-polled";
+		poll-interval=<100>;
+		autorepeat;
 
-		row-gpios = <&gpio7 0 0
-			     &gpio7 1 0
-			     &gpio7 2 0
-				 &gpio7 3 0>;
+		button21{
+			label="GPIO F4";
+			linux,code=<62>;
+			gpios=<&gpio8 0 GPIO_ACTIVE_LOW>;
+		};
 
-		col-gpios = <&gpio7 4 0
-			     &gpio7 5 0
-				 &gpio7 6 0
-				 &gpio7 7 0>;
+		button22{
+			label="GPIO F3";
+			linux,code=<61>;
+			gpios=<&gpio8 1 GPIO_ACTIVE_LOW>;
+		};
 
-		linux,keymap = <0x0000008B
-				0x0100009E
-				0x02000069
-				0x03000069
-				0x0001006A
-				0x0101001C
-				0x0201006C
-				0x0301006C
-				0x0002006A
-				0x0102001C
-				0x0202006C
-				0x0302006C
-				0x0003006A
-				0x0103001C
-				0x0203006C
-				0x0303006C>;
-	}; */
+		button23{
+			label="GPIO F2";
+			linux,code=<60>;
+			gpios=<&gpio8 2 GPIO_ACTIVE_LOW>;
+		};
+
+		button24{
+			label="GPIO F1";
+			linux,code=<59>;
+			gpios=<&gpio8 3 GPIO_ACTIVE_LOW>;
+		};
+	};
 
 };
 
@@ -298,7 +295,7 @@
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
 	
-	/* gpio6: gpio@20 {
+	gpio6: gpio@20 {
 		compatible = "microchip,mcp23017";
 		gpio-controller;
 		#gpio-cells=<2>;
@@ -310,7 +307,7 @@
 		gpio-controller;
 		#gpio-cells=<2>;
 		reg=<0x21>;
-	}; */
+	};
 
 };
 
@@ -325,28 +322,38 @@
 		reg=<0x34>;
 
 		keypad,num-rows = <4>;
-	    keypad,num-columns = <4>;
-		linux,keymap = <0x0000008B
-		0x0100009E
-		0x02000069
-		0x03000069
-		0x0001006A
-		0x0101001C
-		0x0201006C
-		0x0301006C
-		0x0002006A
-		0x0102001C
-		0x0202006C
-		0x0302006C
-		0x0003006A
-		0x0103001C
-		0x0203006C
-		0x0303006C>;
+	    keypad,num-columns = <5>;
+		linux,keymap = <0x0000003B
+						0x0100003C
+						0x0200003D
+						0x0300003E
+						0x0001003F
+						0x01010040
+						0x02010041
+						0x03010042
+						0x00020043
+						0x01020044
+						0x02020002
+						0x03020003
+						0x00030004
+						0x01030005
+						0x02030006
+						0x03030007
+						0x00040008
+						0x01040009
+						0x0204000A
+						0x0304000B>;
 
 		interrupt-parent = <&gpio1>;
 		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;
 	};
 	
+	 gpio8: gpio@21 {
+		compatible = "nxp,pcf8574";
+		gpio-controller;
+		#gpio-cells=<2>;
+		reg=<0x21>;
+	};
 
 };
 
