@@ -1027,7 +1027,7 @@ static int mmc_select_hs(struct mmc_card *card)
 			   card->ext_csd.generic_cmd6_time,
 			   true, false, true);
 	if (!err) {
-		printk(KERN_INFO "E2C: mmc_select_hs\n");
+		/* printk(KERN_INFO "E2C: mmc_select_hs\n"); */
 		mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
 		err = mmc_switch_status(card);
 	}
@@ -1445,7 +1445,7 @@ bus_speed:
 	 * Set the bus speed to the selected bus timing.
 	 * If timing is not selected, backward compatible is the default.
 	 */
-	printk(KERN_INFO "E2C: mmc_select_timing\n");
+	/* printk(KERN_INFO "E2C: mmc_select_timing\n"); */
 	mmc_set_bus_speed(card);
 	return 0;
 }
@@ -1674,7 +1674,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		if (!err)
 			card->ext_csd.power_off_notification = EXT_CSD_POWER_ON;
 	}
-printk(KERN_INFO "E2C: mmc_init_card: Select Timing\n");
+/* printk(KERN_INFO "E2C: mmc_init_card: Select Timing\n"); */
 	/*
 	 * Select timing interface
 	 */
@@ -1703,7 +1703,7 @@ printk(KERN_INFO "E2C: mmc_init_card: Select Timing\n");
 	 */
 	mmc_select_powerclass(card);
 
-	printk(KERN_INFO "E2C: mmc_init_card: Enable HPI\n");
+/*	printk(KERN_INFO "E2C: mmc_init_card: Enable HPI\n"); */
 	/*
 	 * Enable HPI feature (if supported)
 	 */
@@ -1711,7 +1711,7 @@ printk(KERN_INFO "E2C: mmc_init_card: Select Timing\n");
 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
 				EXT_CSD_HPI_MGMT, 1,
 				card->ext_csd.generic_cmd6_time);
-				printk(KERN_INFO "E2C: mmc_init_card: Error %d\n",err);
+				/* printk(KERN_INFO "E2C: mmc_init_card: Error %d\n",err);*/
 		if (err && err != -EBADMSG)
 			goto free_card;
 		if (err) {

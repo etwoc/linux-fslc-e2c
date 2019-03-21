@@ -31,7 +31,7 @@
 #include <video/mxc_edid.h>
 #include "../edid.h"
 
-#undef DEBUG  /* define this for verbose EDID parsing output */
+#define DEBUG  /* define this for verbose EDID parsing output */
 #ifdef DEBUG
 #define DPRINTK(fmt, args...) printk(fmt, ## args)
 #else
@@ -85,6 +85,11 @@ const struct fb_videomode mxc_cea_mode[64] = {
 	[9] = {
 		NULL, 60, 1440, 240, 37108, 114, 38, 15, 4, 124, 3, 0,
 		FB_VMODE_NONINTERLACED | FB_VMODE_ASPECT_16_9, 0,
+	},
+	/* #13: 1024x768p@59.94/60Hz 4:3 */
+	[13] = {
+		NULL, 60, 1024, 768, 15384, 160, 24, 29, 3, 136, 6, 0,
+		FB_VMODE_NONINTERLACED | FB_VMODE_ASPECT_4_3, FB_MODE_IS_VESA,
 	},
 	/* #14: 1440x480p@59.94/60Hz 4:3 */
 	[14] = {

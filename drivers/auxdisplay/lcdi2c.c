@@ -254,7 +254,7 @@ static int lcdi2c_probe(struct i2c_client *client, const struct i2c_device_id *i
     data->row = 0;
     data->column = 0;
     data->handle = client;
-    data->backlight = 1;
+    data->backlight = 0;
     data->cursor = cursor;
     data->blink = blink;
     data->deviceopencnt = 0;
@@ -1217,7 +1217,7 @@ void lcdinit(LcdData_t *lcd, lcd_topology topo)
         lcd->displayfunction |= LCD_FS_2LINES;
 
     MSLEEP(50);
-    _buswrite(lcd, lcd->backlight ? (1 << PIN_BACKLIGHTON) : 0);
+    _buswrite(lcd, lcd->backlight ? (1 << PIN_BACKLIGHTON) : 1);
     MSLEEP(100);
 
     _write4bits(lcd, (1 << PIN_DB4) | (1 << PIN_DB5));

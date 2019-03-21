@@ -69,6 +69,14 @@
 		startup-delay-us = <70000>;
 		enable-active-high;
 	};
+
+		vdac_vdd: fixedregulator@1 {
+			compatible = "regulator-fixed";
+			regulator-name = "dac-regulator";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+		};
+	
 /*
 	kim {
 		compatible = "kim";
@@ -294,7 +302,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
-	
+/*	
 	gpio6: gpio@20 {
 		compatible = "microchip,mcp23017";
 		gpio-controller;
@@ -308,7 +316,7 @@
 		#gpio-cells=<2>;
 		reg=<0x21>;
 	};
-
+*/
 };
 
 &i2c3 {
@@ -345,7 +353,8 @@
 						0x0304000B>;
 
 		interrupt-parent = <&gpio1>;
-		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;
+		/* interrupts = <19 IRQ_TYPE_EDGE_FALLING>;  0B Board */
+		interrupts = <22 IRQ_TYPE_EDGE_FALLING>; /* 02 Board */
 	};
 	
 	 gpio8: gpio@21 {
@@ -353,6 +362,12 @@
 		gpio-controller;
 		#gpio-cells=<2>;
 		reg=<0x21>;
+	};
+
+	mcp4725@60 {
+		compatible = "microchip,mcp4725";
+		reg = <0x60>;
+		vdd-supply = <&vdac_vdd>;
 	};
 
 };

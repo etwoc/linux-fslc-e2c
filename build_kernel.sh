@@ -3,8 +3,8 @@
 source /opt/yocto/2.4.2/environment-setup-armv7at2hf-neon-fslc-linux-gnueabi
 
 BOARD=$1
-SC100_ROOTFS_PATH=/home/user/projects/rootfs
-SC200_ROOTFS_PATH=/home/user/projects/rootfs_chrome
+SC100_ROOTFS_PATH=/home/user/projects/rootfs_nxp
+SC200_ROOTFS_PATH=/home/user/projects/rootfs_stealth
 TFTP_PATH=/home/user/projects/tftp
 
 echo "Board type is" $BOARD
@@ -36,6 +36,10 @@ if [ "menuconfig" == "$2" ]; then
 	echo "Menu Config"
 	make $IMX6TYPE
 	make menuconfig
+elif [ "savedefconfig" == "$2" ]; then
+	echo "Save defconfig"
+	make savedefconfig
+	cp defconfig arch/arm/configs/$IMX6TYPE
 elif [ "build" == "$2" ]; then
 	echo "Config file is " $IMX6TYPE
 	echo "Device trees is " $IMX6DTB
