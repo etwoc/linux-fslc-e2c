@@ -302,14 +302,14 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c2>;
 	status = "okay";
-/*	
+/*
 	gpio6: gpio@20 {
 		compatible = "microchip,mcp23017";
 		gpio-controller;
 		#gpio-cells=<2>;
 		reg=<0x20>;
 	};
-	
+
 	gpio7: gpio@21 {
 		compatible = "microchip,mcp23017";
 		gpio-controller;

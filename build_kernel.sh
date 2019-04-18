@@ -41,14 +41,18 @@ elif [ "savedefconfig" == "$2" ]; then
 	make savedefconfig
 	cp defconfig arch/arm/configs/$IMX6TYPE
 elif [ "build" == "$2" ]; then
-	echo "Config file is " $IMX6TYPE
-	echo "Device trees is " $IMX6DTB
-
-	# make $IMX6TYPE
+	echo "Building kernel....."
+	echo "Config file: " $IMX6TYPE
+	echo "Device tree: " $IMX6DTB
+	make $IMX6TYPE
 	make -j4 zImage
 	make -j4 modules
 	make -j4 $IMX6DTB
-
+elif [ "dtb" == "$2" ]; then
+	echo "Building Device Tree: " $IMX6DTB
+	make -j4 $IMX6DTB
+	echo "Copying Device Tree"
+	cp arch/arm/boot/dts/$IMX6DTB $TFTP_PATH
 elif [ "install" == "$2" ]; then
 	ZIMAGE="zImage-$1"
 	echo "Copying zImage to  " $ZIMAGE
