@@ -353,7 +353,8 @@
 						0x0304000B>;
 
 		interrupt-parent = <&gpio1>;
-		interrupts = <19 IRQ_TYPE_EDGE_FALLING>;  / * 0B Board */
+		/* interrupts = <19 IRQ_TYPE_EDGE_FALLING>;  0B Board */
+		interrupts = <22 IRQ_TYPE_EDGE_FALLING>; /* 02 Board */
 	};
 	
 	 gpio8: gpio@21 {
